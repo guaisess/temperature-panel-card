@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="190" viewBox="0 0 760 190">
+  <rect width="100%" height="100%" rx="16" fill="#111111"/>
+  <text x="24" y="36" font-family="Roboto, Arial, sans-serif" font-size="18" fill="#e5e5e5">Colores por temperatura (parametrizables con color_stops)</text><defs><linearGradient id="esc"><stop offset="0.154" stop-color="#3b82f6"/><stop offset="0.385" stop-color="#06b6d4"/><stop offset="0.538" stop-color="#22c55e"/><stop offset="0.692" stop-color="#f59e0b"/><stop offset="0.846" stop-color="#ef4444"/></linearGradient></defs>
+  <rect x="40" y="64" width="680" height="34" rx="8" fill="url(#esc)"/><line x1="144.61538461538464" y1="98" x2="144.61538461538464" y2="112" stroke="#9ca3af"/>
+  <text x="144.61538461538464" y="130" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="14" fill="#e5e5e5">10 °C</text>
+  <text x="144.61538461538464" y="150" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="12" fill="#9ca3af">#3b82f6</text><line x1="301.53846153846155" y1="98" x2="301.53846153846155" y2="112" stroke="#9ca3af"/>
+  <text x="301.53846153846155" y="130" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="14" fill="#e5e5e5">16 °C</text>
+  <text x="301.53846153846155" y="150" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="12" fill="#9ca3af">#06b6d4</text><line x1="406.15384615384613" y1="98" x2="406.15384615384613" y2="112" stroke="#9ca3af"/>
+  <text x="406.15384615384613" y="130" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="14" fill="#e5e5e5">20 °C</text>
+  <text x="406.15384615384613" y="150" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="12" fill="#9ca3af">#22c55e</text><line x1="510.7692307692308" y1="98" x2="510.7692307692308" y2="112" stroke="#9ca3af"/>
+  <text x="510.7692307692308" y="130" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="14" fill="#e5e5e5">24 °C</text>
+  <text x="510.7692307692308" y="150" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="12" fill="#9ca3af">#f59e0b</text><line x1="615.3846153846154" y1="98" x2="615.3846153846154" y2="112" stroke="#9ca3af"/>
+  <text x="615.3846153846154" y="130" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="14" fill="#e5e5e5">28 °C</text>
+  <text x="615.3846153846154" y="150" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="12" fill="#9ca3af">#ef4444</text>
+</svg>

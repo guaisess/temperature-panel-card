@@ -1,6 +1,6 @@
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -93,6 +93,7 @@ class TemperaturePanelCard extends HTMLElement {
     const name = c.name || st.attributes.friendly_name || c.entity;
     const color = isNaN(cur) ? 'var(--primary-text-color)' : this._scale.colorAt(cur);
     const meta = this._metaBase();
+    const range = [];
 
     let chart = '';
     const pts = this._points;
@@ -102,8 +103,8 @@ class TemperaturePanelCard extends HTMLElement {
         const all = isNaN(cur) ? pts : [...pts, { t: Date.now(), v: cur }];
         const mm = Stats.minMax(all);
         if (c.show_minmax) {
-          meta.push(`<span title="${tpcT(h, 'max')}"><ha-icon icon="mdi:arrow-up"></ha-icon>${this._fmt(mm.max, c.decimals)}°</span>`);
-          meta.push(`<span title="${tpcT(h, 'min')}"><ha-icon icon="mdi:arrow-down"></ha-icon>${this._fmt(mm.min, c.decimals)}°</span>`);
+          range.push(`<span title="${tpcT(h, 'max')}"><ha-icon icon="mdi:arrow-up"></ha-icon>${this._fmt(mm.max, c.decimals)}°</span>`);
+          range.push(`<span title="${tpcT(h, 'min')}"><ha-icon icon="mdi:arrow-down"></ha-icon>${this._fmt(mm.min, c.decimals)}°</span>`);
         }
         const r = new SparklineChart(this._scale, c).render(all, this._uid);
         const dot = c.show_current_dot ? `<div class="dot" style="top:${r.lastY}%;background:${color}"></div>` : '';
@@ -116,7 +117,8 @@ class TemperaturePanelCard extends HTMLElement {
         <div class="info">
           <div class="name">${name}</div>
           <div class="temp" style="color:${color}">${isNaN(cur) ? st.state : this._fmt(cur, c.decimals)}<small>${unit}</small></div>
-          <div class="meta">${meta.join('')}</div>
+          ${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}
+          ${range.length ? `<div class="meta">${range.join('')}</div>` : ''}
         </div>${chart}
       </div></ha-card>`;
   }

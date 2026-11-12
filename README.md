@@ -2,9 +2,9 @@
 
 # Temperature Panel Card
 
-Tarjeta Lovelace para Home Assistant con diseño **horizontal y limpio**: nombre, temperatura, humedad, batería y una **gráfica cuyo color cambia según la temperatura** (degradado vertical, estilo Andy). Muestra el **máx/mín** del periodo.
+Tarjeta Lovelace para Home Assistant con diseño **horizontal y limpio**: nombre, temperatura, humedad, batería y una **gráfica cuyo color cambia según la temperatura** (degradado vertical). Muestra el **máx/mín** del periodo.
 
-Inspirada en [nc-temperature-card](https://github.com/nicholas-cod3r/nc-temperature-card) y [andy-temperature-card](https://github.com/maglerod/andy-temperature-card).
+<p align="center"><img src="docs/images/anatomia.svg" alt="Anatomía de la tarjeta"></p>
 
 ## Instalación (HACS)
 
@@ -30,6 +30,8 @@ hours: 24
 ### Varias tarjetas en vertical
 
 Usa `vertical-stack` de HA:
+
+<p align="center"><img src="docs/images/varias-tarjetas.svg" alt="Varias tarjetas apiladas"></p>
 
 ```yaml
 type: vertical-stack
@@ -60,11 +62,13 @@ cards:
 | `battery_low` | `20` | % bajo el cual la batería se marca en rojo |
 | `line_width` | `2` | Grosor de la línea |
 | `area_opacity` | `0.18` | Opacidad del relleno bajo la línea |
-| `color_stops` | ver abajo | Umbrales de color (solo YAML) |
+| `color_stops` | ver abajo | Umbrales de color: lista de `{temp, color}` (editor visual o YAML) |
 
 ### Colores por temperatura
 
-La gráfica se colorea con un degradado: cada altura toma el color de su temperatura. Por defecto:
+La gráfica se colorea con un degradado: cada altura toma el color de su temperatura. Los colores y umbrales son **parametrizables**, desde el editor visual (sección *Colores de la gráfica*) o en YAML con `color_stops`. Por defecto:
+
+<p align="center"><img src="docs/images/colores.svg" alt="Escala de colores"></p>
 
 | °C | Color |
 |---|---|
@@ -74,7 +78,7 @@ La gráfica se colorea con un degradado: cada altura toma el color de su tempera
 | 24 | `#f59e0b` naranja |
 | ≥28 | `#ef4444` rojo |
 
-Personalización:
+Personalización (colores en hex `#rrggbb`; se pueden poner los umbrales que se quieran):
 
 ```yaml
 color_stops:
@@ -101,6 +105,8 @@ npm run build
 | `sparkline-chart.js` | Generación del SVG |
 | `styles.js` | CSS |
 | `card.js` / `editor.js` / `index.js` | Tarjeta, editor y registro |
+
+Las imágenes de `docs/images/` se regeneran con `node scripts/make-docs-images.mjs`.
 
 Versionado `AAAA.MM.V` (ver [CHANGELOG](CHANGELOG.md)).
 

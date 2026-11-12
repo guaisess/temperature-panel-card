@@ -1,11 +1,11 @@
 (() => {
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
-  version: '2026.11.1',
+  version: '2026.11.2',
   // Nombre de los elementos personalizados
   cardTag: 'temperature-panel-card',
   editorTag: 'temperature-panel-card-editor',
@@ -50,7 +50,7 @@ const TPC_CONFIG = {
 
 /**
  * Textos traducibles (es / en).
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 const TPC_TEXTS = {
   es: {
@@ -58,6 +58,7 @@ const TPC_TEXTS = {
     name: 'Nombre', hours: 'Horas de gráfica', decimals: 'Decimales', graph_height: 'Alto de la gráfica (px)',
     show_humidity: 'Mostrar humedad', show_battery: 'Mostrar batería', show_minmax: 'Mostrar máx/mín',
     show_graph: 'Mostrar gráfica', show_current_dot: 'Punto del valor actual',
+    colors: 'Colores de la gráfica', temp: 'Temp. (°)', color: 'Color',
     max: 'Máx', min: 'Mín', no_entity: 'Entidad no disponible',
     entity_required: 'Debes indicar la entidad de temperatura (entity)',
   },
@@ -66,6 +67,7 @@ const TPC_TEXTS = {
     name: 'Name', hours: 'Graph hours', decimals: 'Decimals', graph_height: 'Graph height (px)',
     show_humidity: 'Show humidity', show_battery: 'Show battery', show_minmax: 'Show max/min',
     show_graph: 'Show graph', show_current_dot: 'Current value dot',
+    colors: 'Graph colors', temp: 'Temp (°)', color: 'Color',
     max: 'Max', min: 'Min', no_entity: 'Entity unavailable',
     entity_required: 'You must set the temperature entity (entity)',
   },
@@ -80,12 +82,22 @@ function tpcT(hass, key) {
 
 /**
  * Escala de color por temperatura con interpolación lineal entre umbrales.
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 class ColorScale {
   /** @param {Array<{temp:number,color:string}>} stops umbrales (color hex #rrggbb) */
   constructor(stops) {
-    this.stops = [...stops].sort((a, b) => a.temp - b.temp);
+    this.stops = stops
+      .map((s) => ({ temp: Number(s.temp), color: ColorScale.toHex(s.color) }))
+      .sort((a, b) => a.temp - b.temp);
+  }
+
+  /** Normaliza un color (hex #rrggbb/#rgb o array [r,g,b]) a #rrggbb. */
+  static toHex(c) {
+    if (Array.isArray(c)) return '#' + c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+    let h = String(c).trim();
+    if (/^#[0-9a-f]{3}$/i.test(h)) h = '#' + [...h.slice(1)].map((x) => x + x).join('');
+    return h;
   }
 
   /** Convierte #rrggbb a [r,g,b]. */
@@ -262,16 +274,16 @@ class SparklineChart {
 
 /**
  * Estilos CSS de la tarjeta.
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 const TPC_STYLES = `
   ha-card { overflow: hidden; position: relative; }
   .row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
   .info { display: flex; flex-direction: column; min-width: 0; flex: 0 0 auto; max-width: 55%; }
   .name { font-size: 0.95rem; font-weight: 500; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .temp { font-size: 2.1rem; font-weight: 300; line-height: 1.1; }
+  .temp { font-size: 2.1rem; font-weight: 700; line-height: 1.1; }
   .temp small { font-size: 0.9rem; opacity: .7; margin-left: 2px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 0.8rem; color: var(--secondary-text-color); align-items: center; }
+  .meta { display: flex; flex-wrap: nowrap; gap: 10px; font-size: 0.8rem; color: var(--secondary-text-color); align-items: center; min-height: 1.2em; margin-top: 2px; }
   .meta span { display: inline-flex; align-items: center; gap: 2px; }
   .meta ha-icon { --mdc-icon-size: 15px; }
   .low { color: var(--error-color, #ef4444); }
@@ -283,7 +295,7 @@ const TPC_STYLES = `
 
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -376,6 +388,7 @@ class TemperaturePanelCard extends HTMLElement {
     const name = c.name || st.attributes.friendly_name || c.entity;
     const color = isNaN(cur) ? 'var(--primary-text-color)' : this._scale.colorAt(cur);
     const meta = this._metaBase();
+    const range = [];
 
     let chart = '';
     const pts = this._points;
@@ -385,8 +398,8 @@ class TemperaturePanelCard extends HTMLElement {
         const all = isNaN(cur) ? pts : [...pts, { t: Date.now(), v: cur }];
         const mm = Stats.minMax(all);
         if (c.show_minmax) {
-          meta.push(`<span title="${tpcT(h, 'max')}"><ha-icon icon="mdi:arrow-up"></ha-icon>${this._fmt(mm.max, c.decimals)}°</span>`);
-          meta.push(`<span title="${tpcT(h, 'min')}"><ha-icon icon="mdi:arrow-down"></ha-icon>${this._fmt(mm.min, c.decimals)}°</span>`);
+          range.push(`<span title="${tpcT(h, 'max')}"><ha-icon icon="mdi:arrow-up"></ha-icon>${this._fmt(mm.max, c.decimals)}°</span>`);
+          range.push(`<span title="${tpcT(h, 'min')}"><ha-icon icon="mdi:arrow-down"></ha-icon>${this._fmt(mm.min, c.decimals)}°</span>`);
         }
         const r = new SparklineChart(this._scale, c).render(all, this._uid);
         const dot = c.show_current_dot ? `<div class="dot" style="top:${r.lastY}%;background:${color}"></div>` : '';
@@ -399,7 +412,8 @@ class TemperaturePanelCard extends HTMLElement {
         <div class="info">
           <div class="name">${name}</div>
           <div class="temp" style="color:${color}">${isNaN(cur) ? st.state : this._fmt(cur, c.decimals)}<small>${unit}</small></div>
-          <div class="meta">${meta.join('')}</div>
+          ${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}
+          ${range.length ? `<div class="meta">${range.join('')}</div>` : ''}
         </div>${chart}
       </div></ha-card>`;
   }
@@ -407,14 +421,20 @@ class TemperaturePanelCard extends HTMLElement {
 
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }
   set hass(hass) { this._hass = hass; this._draw(); }
 
-  /** Esquema del formulario. */
+  /** Esquema del formulario (los colores van en una sección desplegable). */
   _schema() {
+    const stops = TPC_CONFIG.colorStops;
+    const colorFields = [];
+    stops.forEach((_, i) => {
+      colorFields.push({ name: `temp_${i}`, selector: { number: { mode: 'box', step: 0.5 } } });
+      colorFields.push({ name: `color_${i}`, selector: { color_rgb: {} } });
+    });
     return [
       { name: 'entity', required: true, selector: { entity: { domain: 'sensor', device_class: 'temperature' } } },
       { name: 'name', selector: { text: {} } },
@@ -436,30 +456,63 @@ class TemperaturePanelCardEditor extends HTMLElement {
           { name: 'show_current_dot', selector: { boolean: {} } },
         ],
       },
+      { type: 'expandable', name: '', title: tpcT(this._hass, 'colors'), schema: [{ type: 'grid', name: '', schema: colorFields }] },
     ];
+  }
+
+  /** Convierte la configuración (color_stops) a campos planos del formulario. */
+  _toForm(config) {
+    const data = { ...TPC_CONFIG.defaults, ...config };
+    const stops = config.color_stops || TPC_CONFIG.colorStops;
+    TPC_CONFIG.colorStops.forEach((_, i) => {
+      const s = stops[i] || TPC_CONFIG.colorStops[i];
+      data[`temp_${i}`] = s.temp;
+      const hex = ColorScale.toHex(s.color);
+      data[`color_${i}`] = ColorScale._rgb(hex);
+    });
+    delete data.color_stops;
+    return data;
+  }
+
+  /** Convierte los campos planos del formulario de nuevo a color_stops. */
+  _fromForm(value) {
+    const out = { ...value };
+    const stops = [];
+    TPC_CONFIG.colorStops.forEach((_, i) => {
+      if (out[`temp_${i}`] !== undefined && out[`color_${i}`]) {
+        stops.push({ temp: Number(out[`temp_${i}`]), color: ColorScale.toHex(out[`color_${i}`]) });
+      }
+      delete out[`temp_${i}`];
+      delete out[`color_${i}`];
+    });
+    out.color_stops = stops;
+    return out;
   }
 
   _draw() {
     if (!this._config || !this._hass) return;
     if (!this._form) {
       this._form = document.createElement('ha-form');
-      this._form.computeLabel = (s) => tpcT(this._hass, s.name);
+      this._form.computeLabel = (s) => {
+        const m = /^(temp|color)_(\d+)$/.exec(s.name);
+        return m ? `${tpcT(this._hass, m[1])} ${Number(m[2]) + 1}` : tpcT(this._hass, s.name);
+      };
       this._form.addEventListener('value-changed', (ev) => {
         this.dispatchEvent(new CustomEvent('config-changed', {
-          detail: { config: ev.detail.value }, bubbles: true, composed: true,
+          detail: { config: this._fromForm(ev.detail.value) }, bubbles: true, composed: true,
         }));
       });
       this.appendChild(this._form);
     }
     this._form.hass = this._hass;
     this._form.schema = this._schema();
-    this._form.data = { ...TPC_CONFIG.defaults, ...this._config };
+    this._form.data = this._toForm(this._config);
   }
 }
 
 /**
  * Registro de los elementos personalizados y de la tarjeta en el selector de HA.
- * Versión: 2026.11.1
+ * Versión: 2026.11.2
  */
 customElements.define(TPC_CONFIG.cardTag, TemperaturePanelCard);
 customElements.define(TPC_CONFIG.editorTag, TemperaturePanelCardEditor);
