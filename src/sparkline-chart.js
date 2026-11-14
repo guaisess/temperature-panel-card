@@ -1,6 +1,6 @@
 /**
  * Genera el SVG de la gráfica con degradado vertical según la temperatura.
- * Versión: 2026.11.1
+ * Versión: 2026.11.6
  */
 class SparklineChart {
   /**
@@ -58,9 +58,14 @@ class SparklineChart {
     stops.sort((a, b) => a.off - b.off);
     const stopsSvg = stops.map((s) => `<stop offset="${s.off.toFixed(3)}" stop-color="${s.color}"/>`).join('');
 
+    // Máscara vertical: el relleno coloreado se desvanece hacia abajo (mismo degradado de color que la línea)
+    const fade = this.opts.area_fade
+      ? `<defs><linearGradient id="f${uid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${H}"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="${C.fadeEnd}"/></linearGradient><mask id="m${uid}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="url(#f${uid})"/></mask></defs>`
+      : '';
     const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
       <defs><linearGradient id="g${uid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${H}">${stopsSvg}</linearGradient></defs>
-      <path d="${area}" fill="url(#g${uid})" opacity="${this.opts.area_opacity}"/>
+      ${fade}
+      <path d="${area}" fill="url(#g${uid})" opacity="${this.opts.area_opacity}"${this.opts.area_fade ? ` mask="url(#m${uid})"` : ''}/>
       <path d="${d}" fill="none" stroke="url(#g${uid})" stroke-width="${this.opts.line_width}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
     </svg>`;
     return { svg, lastY: (y(pts[pts.length - 1].v) / H) * 100 };

@@ -1,6 +1,6 @@
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }
@@ -36,6 +36,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
           { name: 'show_humidity', selector: { boolean: {} } },
           { name: 'show_battery', selector: { boolean: {} } },
           { name: 'show_current_dot', selector: { boolean: {} } },
+          { name: 'area_fade', selector: { boolean: {} } },
           { name: 'meta_colors', selector: { boolean: {} } },
         ],
       },

@@ -1,5 +1,5 @@
 // Genera las imágenes SVG de la documentación usando el código real de la tarjeta.
-// Versión: 2026.11.2
+// Versión: 2026.11.6
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 // Carga las clases necesarias de src/ (mismo orden que el build)
@@ -28,13 +28,20 @@ function tarjeta(x, y, w, d, uid) {
   const all = pts.map((p) => p.v);
   const r = new SparklineChart(scale, opts).render(pts, uid);
   const f = (v) => v.toFixed(1).replace('.', ',');
-  const gx = x + w * 0.5, gw = w * 0.5 - 20, gy = y + 18, gh = 78;
+  const infoW = opts.info_width;
+  const gx = x + 14 + infoW + 12, gw = w - (gx - x) - 14, gy = y + 40, gh = 114 - 40 - 12;
+  const low = d.bat <= opts.battery_low;
+  const cb = low ? '#ef4444' : opts.battery_color;
+  // Iconos: gota (humedad) y pila (batería) con los colores configurados
+  const gota = `<path d="M${x + 20},${y + 76} q-5,6 -5,9 a5,5 0 0 0 10,0 q0,-3 -5,-9z" fill="${opts.humidity_color}"/>`;
+  const icoBat = `<rect x="${x + 72}" y="${y + 77}" width="8" height="12" rx="1.5" fill="${cb}"/><rect x="${x + 74}" y="${y + 75}" width="4" height="2" fill="${cb}"/>`;
   return `
   <rect x="${x}" y="${y}" width="${w}" height="114" rx="12" fill="${IMG.tarjeta}" stroke="${IMG.borde}"/>
-  <text x="${x + 16}" y="${y + 28}" font-family="${IMG.fuente}" font-size="14" font-weight="500" fill="${IMG.texto}">${d.nombre}</text>
-  <text x="${x + 16}" y="${y + 62}" font-family="${IMG.fuente}" font-size="34" font-weight="700" fill="${col}">${f(cur)}<tspan font-size="14" font-weight="400" fill="${IMG.suave}"> °C</tspan></text>
-  <text x="${x + 16}" y="${y + 84}" font-family="${IMG.fuente}" font-size="12" fill="${IMG.suave}">💧 ${d.hum} %    🔋 ${d.bat}%</text>
-  <text x="${x + 16}" y="${y + 102}" font-family="${IMG.fuente}" font-size="12" fill="${IMG.suave}">↑ ${f(Math.max(...all))}°    ↓ ${f(Math.min(...all))}°</text>
+  <text x="${x + 14}" y="${y + 26}" font-family="${IMG.fuente}" font-size="14" font-weight="500" fill="${IMG.texto}">${d.nombre}</text>
+  <text x="${x + 14}" y="${y + 62}" font-family="${IMG.fuente}" font-size="30" font-weight="700" fill="${col}">${f(cur)}<tspan font-size="13" font-weight="400" fill="${IMG.suave}"> °C</tspan></text>
+  ${gota}<text x="${x + 30}" y="${y + 87}" font-family="${IMG.fuente}" font-size="12" fill="${IMG.suave}">${d.hum} %</text>
+  ${icoBat}<text x="${x + 84}" y="${y + 87}" font-family="${IMG.fuente}" font-size="12" fill="${low ? cb : IMG.suave}">${d.bat}%</text>
+  <text x="${x + 14}" y="${y + 105}" font-family="${IMG.fuente}" font-size="12" fill="${IMG.suave}">↑ ${f(Math.max(...all))}°    ↓ ${f(Math.min(...all))}°</text>
   <svg x="${gx}" y="${gy}" width="${gw}" height="${gh}" viewBox="0 0 300 100" preserveAspectRatio="none">${r.svg.replace(/<svg[^>]*>|<\/svg>/g, '')}</svg>
   <circle cx="${gx + gw}" cy="${gy + (r.lastY / 100) * gh}" r="4.5" fill="${col}"/>`;
 }

@@ -1,6 +1,6 @@
 /**
  * Registro de los elementos personalizados y de la tarjeta en el selector de HA.
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 customElements.define(TPC_CONFIG.cardTag, TemperaturePanelCard);
 customElements.define(TPC_CONFIG.editorTag, TemperaturePanelCardEditor);

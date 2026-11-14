@@ -2,6 +2,10 @@
 
 Formato de versión: `AAAA.MM.V`.
 
+## 2026.11.6 — 2026-11-14
+- El relleno bajo la línea usa el degradado de color de la línea, más visible y con desvanecido hacia abajo (`area_opacity` 0.5 por defecto, `area_fade`).
+- Imágenes de la documentación regeneradas con el diseño actual.
+
 ## 2026.11.5 — 2026-11-14
 - Iconos de humedad y batería coloreados (`meta_colors`, `humidity_color`, `battery_color`), configurables en YAML y en el editor visual. La batería baja sigue en rojo.
 

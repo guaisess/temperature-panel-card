@@ -1,6 +1,6 @@
 {
   "name": "temperature-panel-card",
-  "version": "2026.11.5",
+  "version": "2026.11.6",
   "description": "Tarjeta Lovelace de temperaturas con gráfica coloreada para Home Assistant",
   "type": "module",
   "scripts": {

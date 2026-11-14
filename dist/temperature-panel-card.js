@@ -1,7 +1,7 @@
 (() => {
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
@@ -26,7 +26,8 @@ const TPC_CONFIG = {
     show_graph: true,
     show_current_dot: true,
     line_width: 2,
-    area_opacity: 0.18,
+    area_opacity: 0.5,   // opacidad máxima del relleno bajo la línea
+    area_fade: true,     // el relleno se desvanece hacia la parte inferior
     battery_low: 20,
     meta_colors: true,           // colorear los iconos de humedad y batería
     humidity_color: '#38bdf8',   // color del icono de humedad
@@ -48,13 +49,14 @@ const TPC_CONFIG = {
     viewHeight: 100, // alto lógico del SVG
     maxPoints: 120,  // puntos máximos tras reducir el histórico
     paddingY: 6,     // margen vertical en unidades del SVG
+    fadeEnd: 0.04,   // opacidad relativa del relleno en el borde inferior (0-1)
     minSpan: 2,      // rango mínimo (grados) para no aplanar la línea
   },
 };
 
 /**
  * Textos traducibles (es / en).
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 const TPC_TEXTS = {
   es: {
@@ -63,7 +65,7 @@ const TPC_TEXTS = {
     show_humidity: 'Mostrar humedad', show_battery: 'Mostrar batería', show_minmax: 'Mostrar máx/mín',
     show_graph: 'Mostrar gráfica', show_current_dot: 'Punto del valor actual',
     colors: 'Colores de la gráfica', temp: 'Temp. (°)', color: 'Color',
-    state_unavailable: 'No disponible', state_unknown: 'Desconocido', meta_colors: 'Colorear iconos de humedad/batería', humidity_color: 'Color humedad', battery_color: 'Color batería', max: 'Máx', min: 'Mín', no_entity: 'Entidad no disponible',
+    state_unavailable: 'No disponible', state_unknown: 'Desconocido', meta_colors: 'Colorear iconos de humedad/batería', humidity_color: 'Color humedad', battery_color: 'Color batería', area_fade: 'Desvanecer relleno de la gráfica', max: 'Máx', min: 'Mín', no_entity: 'Entidad no disponible',
     entity_required: 'Debes indicar la entidad de temperatura (entity)',
   },
   en: {
@@ -72,7 +74,7 @@ const TPC_TEXTS = {
     show_humidity: 'Show humidity', show_battery: 'Show battery', show_minmax: 'Show max/min',
     show_graph: 'Show graph', show_current_dot: 'Current value dot',
     colors: 'Graph colors', temp: 'Temp (°)', color: 'Color',
-    state_unavailable: 'Unavailable', state_unknown: 'Unknown', meta_colors: 'Color humidity/battery icons', humidity_color: 'Humidity color', battery_color: 'Battery color', max: 'Max', min: 'Min', no_entity: 'Entity unavailable',
+    state_unavailable: 'Unavailable', state_unknown: 'Unknown', meta_colors: 'Color humidity/battery icons', humidity_color: 'Humidity color', battery_color: 'Battery color', area_fade: 'Fade graph fill', max: 'Max', min: 'Min', no_entity: 'Entity unavailable',
     entity_required: 'You must set the temperature entity (entity)',
   },
 };
@@ -209,7 +211,7 @@ class Stats {
 
 /**
  * Genera el SVG de la gráfica con degradado vertical según la temperatura.
- * Versión: 2026.11.1
+ * Versión: 2026.11.6
  */
 class SparklineChart {
   /**
@@ -267,9 +269,14 @@ class SparklineChart {
     stops.sort((a, b) => a.off - b.off);
     const stopsSvg = stops.map((s) => `<stop offset="${s.off.toFixed(3)}" stop-color="${s.color}"/>`).join('');
 
+    // Máscara vertical: el relleno coloreado se desvanece hacia abajo (mismo degradado de color que la línea)
+    const fade = this.opts.area_fade
+      ? `<defs><linearGradient id="f${uid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${H}"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="${C.fadeEnd}"/></linearGradient><mask id="m${uid}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="url(#f${uid})"/></mask></defs>`
+      : '';
     const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
       <defs><linearGradient id="g${uid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${H}">${stopsSvg}</linearGradient></defs>
-      <path d="${area}" fill="url(#g${uid})" opacity="${this.opts.area_opacity}"/>
+      ${fade}
+      <path d="${area}" fill="url(#g${uid})" opacity="${this.opts.area_opacity}"${this.opts.area_fade ? ` mask="url(#m${uid})"` : ''}/>
       <path d="${d}" fill="none" stroke="url(#g${uid})" stroke-width="${this.opts.line_width}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
     </svg>`;
     return { svg, lastY: (y(pts[pts.length - 1].v) / H) * 100 };
@@ -278,7 +285,7 @@ class SparklineChart {
 
 /**
  * Estilos CSS de la tarjeta.
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 const TPC_STYLES = `
   ha-card { overflow: hidden; position: relative; }
@@ -302,7 +309,7 @@ const TPC_STYLES = `
 
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -434,7 +441,7 @@ class TemperaturePanelCard extends HTMLElement {
 
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }
@@ -470,6 +477,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
           { name: 'show_humidity', selector: { boolean: {} } },
           { name: 'show_battery', selector: { boolean: {} } },
           { name: 'show_current_dot', selector: { boolean: {} } },
+          { name: 'area_fade', selector: { boolean: {} } },
           { name: 'meta_colors', selector: { boolean: {} } },
         ],
       },
@@ -532,7 +540,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
 
 /**
  * Registro de los elementos personalizados y de la tarjeta en el selector de HA.
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 customElements.define(TPC_CONFIG.cardTag, TemperaturePanelCard);
 customElements.define(TPC_CONFIG.editorTag, TemperaturePanelCardEditor);

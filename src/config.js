@@ -1,6 +1,6 @@
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.5
+ * Versión: 2026.11.6
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
@@ -25,7 +25,8 @@ const TPC_CONFIG = {
     show_graph: true,
     show_current_dot: true,
     line_width: 2,
-    area_opacity: 0.18,
+    area_opacity: 0.5,   // opacidad máxima del relleno bajo la línea
+    area_fade: true,     // el relleno se desvanece hacia la parte inferior
     battery_low: 20,
     meta_colors: true,           // colorear los iconos de humedad y batería
     humidity_color: '#38bdf8',   // color del icono de humedad
@@ -47,6 +48,7 @@ const TPC_CONFIG = {
     viewHeight: 100, // alto lógico del SVG
     maxPoints: 120,  // puntos máximos tras reducir el histórico
     paddingY: 6,     // margen vertical en unidades del SVG
+    fadeEnd: 0.04,   // opacidad relativa del relleno en el borde inferior (0-1)
     minSpan: 2,      // rango mínimo (grados) para no aplanar la línea
   },
 };
