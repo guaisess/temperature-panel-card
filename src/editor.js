@@ -1,6 +1,6 @@
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.3
+ * Versión: 2026.11.4
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }

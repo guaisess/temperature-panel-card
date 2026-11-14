@@ -1,6 +1,6 @@
 /**
  * Estilos CSS de la tarjeta.
- * Versión: 2026.11.3
+ * Versión: 2026.11.4
  */
 const TPC_STYLES = `
   ha-card { overflow: hidden; position: relative; }
@@ -9,6 +9,8 @@ const TPC_STYLES = `
   .info { display: flex; flex-direction: column; min-width: 0; grid-column: 1; grid-row: 2; }
   .name { grid-column: 1 / -1; grid-row: 1; font-size: 0.95rem; font-weight: 500; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .temp { font-size: 2.1rem; font-weight: 700; line-height: 1.1; }
+  .temp.off { font-size: 1.05rem; font-weight: 500; line-height: 2.31rem; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chart.off { opacity: .35; }
   .temp small { font-size: 0.9rem; opacity: .7; margin-left: 2px; }
   .meta { display: flex; flex-wrap: nowrap; gap: 10px; font-size: 0.8rem; color: var(--secondary-text-color); align-items: center; min-height: 1.2em; margin-top: 2px; }
   .meta span { display: inline-flex; align-items: center; gap: 2px; }

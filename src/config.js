@@ -1,10 +1,10 @@
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.3
+ * Versión: 2026.11.4
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
-  version: '2026.11.3',
+  version: '2026.11.4',
   // Nombre de los elementos personalizados
   cardTag: 'temperature-panel-card',
   editorTag: 'temperature-panel-card-editor',

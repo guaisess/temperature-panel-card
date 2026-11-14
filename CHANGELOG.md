@@ -2,6 +2,9 @@
 
 Formato de versión: `AAAA.MM.V`.
 
+## 2026.11.4 — 2026-11-14
+- Estados `unknown`/`unavailable`: texto traducido ("No disponible"/"Desconocido") pequeño y atenuado, sin unidad ni solapes; gráfica atenuada y sin punto actual.
+
 ## 2026.11.3 — 2026-11-14
 - Nuevo diseño: el nombre ocupa todo el ancho y la gráfica va debajo, hasta el borde inferior (respetando el padding).
 - La gráfica empieza siempre en la misma posición, independientemente de la longitud del nombre (`info_width`).

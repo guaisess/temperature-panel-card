@@ -1,6 +1,6 @@
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.3
+ * Versión: 2026.11.4
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -91,6 +91,8 @@ class TemperaturePanelCard extends HTMLElement {
     const cur = parseFloat(st.state);
     const unit = st.attributes.unit_of_measurement || '°C';
     const name = c.name || st.attributes.friendly_name || c.entity;
+    const off = isNaN(cur);
+    const stateTxt = st.state === 'unavailable' ? tpcT(h, 'state_unavailable') : st.state === 'unknown' ? tpcT(h, 'state_unknown') : st.state;
     const color = isNaN(cur) ? 'var(--primary-text-color)' : this._scale.colorAt(cur);
     const meta = this._metaBase();
     const range = [];
@@ -107,8 +109,8 @@ class TemperaturePanelCard extends HTMLElement {
           range.push(`<span title="${tpcT(h, 'min')}"><ha-icon icon="mdi:arrow-down"></ha-icon>${this._fmt(mm.min, c.decimals)}°</span>`);
         }
         const r = new SparklineChart(this._scale, c).render(all, this._uid);
-        const dot = c.show_current_dot ? `<div class="dot" style="top:${r.lastY}%;background:${color}"></div>` : '';
-        chart = `<div class="chart" style="min-height:${c.graph_height}px">${r.svg}${dot}</div>`;
+        const dot = c.show_current_dot && !off ? `<div class="dot" style="top:${r.lastY}%;background:${color}"></div>` : '';
+        chart = `<div class="chart${off ? ' off' : ''}" style="min-height:${c.graph_height}px">${r.svg}${dot}</div>`;
       }
     }
 
@@ -116,7 +118,9 @@ class TemperaturePanelCard extends HTMLElement {
       <ha-card><div class="row${c.show_graph ? '' : ' nograph'}" style="--tpc-info-w:${c.info_width}px">
         <div class="name">${name}</div>
         <div class="info">
-          <div class="temp" style="color:${color}">${isNaN(cur) ? st.state : this._fmt(cur, c.decimals)}<small>${unit}</small></div>
+          ${off
+            ? `<div class="temp off" title="${stateTxt}">${stateTxt}</div>`
+            : `<div class="temp" style="color:${color}">${this._fmt(cur, c.decimals)}<small>${unit}</small></div>`}
           ${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}
           ${range.length ? `<div class="meta">${range.join('')}</div>` : ''}
         </div>${chart}
