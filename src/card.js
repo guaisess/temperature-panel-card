@@ -1,6 +1,6 @@
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -69,12 +69,14 @@ class TemperaturePanelCard extends HTMLElement {
     const meta = [];
     const hum = c.humidity && h.states[c.humidity];
     if (c.show_humidity && hum && !isNaN(parseFloat(hum.state))) {
-      meta.push(`<span><ha-icon icon="mdi:water-percent"></ha-icon>${this._fmt(hum.state, 0)} ${hum.attributes.unit_of_measurement || '%'}</span>`);
+      const st = c.meta_colors ? ` style="color:${c.humidity_color}"` : '';
+      meta.push(`<span><ha-icon icon="mdi:water-percent"${st}></ha-icon>${this._fmt(hum.state, 0)} ${hum.attributes.unit_of_measurement || '%'}</span>`);
     }
     const bat = c.battery && h.states[c.battery];
     if (c.show_battery && bat && !isNaN(parseFloat(bat.state))) {
       const low = parseFloat(bat.state) <= c.battery_low;
-      meta.push(`<span class="${low ? 'low' : ''}"><ha-icon icon="mdi:${low ? 'battery-alert' : 'battery'}"></ha-icon>${this._fmt(bat.state, 0)}%</span>`);
+      const st = c.meta_colors && !low ? ` style="color:${c.battery_color}"` : '';
+      meta.push(`<span class="${low ? 'low' : ''}"><ha-icon icon="mdi:${low ? 'battery-alert' : 'battery'}"${st}></ha-icon>${this._fmt(bat.state, 0)}%</span>`);
     }
     return meta;
   }

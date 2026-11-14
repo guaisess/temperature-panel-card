@@ -1,7 +1,7 @@
 (() => {
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
@@ -28,6 +28,9 @@ const TPC_CONFIG = {
     line_width: 2,
     area_opacity: 0.18,
     battery_low: 20,
+    meta_colors: true,           // colorear los iconos de humedad y batería
+    humidity_color: '#38bdf8',   // color del icono de humedad
+    battery_color: '#22c55e',    // color del icono de batería (en rojo si está baja)
   },
 
   // Umbrales de color por defecto (°C): la gráfica se colorea con degradado según el valor
@@ -51,7 +54,7 @@ const TPC_CONFIG = {
 
 /**
  * Textos traducibles (es / en).
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 const TPC_TEXTS = {
   es: {
@@ -60,7 +63,7 @@ const TPC_TEXTS = {
     show_humidity: 'Mostrar humedad', show_battery: 'Mostrar batería', show_minmax: 'Mostrar máx/mín',
     show_graph: 'Mostrar gráfica', show_current_dot: 'Punto del valor actual',
     colors: 'Colores de la gráfica', temp: 'Temp. (°)', color: 'Color',
-    state_unavailable: 'No disponible', state_unknown: 'Desconocido', max: 'Máx', min: 'Mín', no_entity: 'Entidad no disponible',
+    state_unavailable: 'No disponible', state_unknown: 'Desconocido', meta_colors: 'Colorear iconos de humedad/batería', humidity_color: 'Color humedad', battery_color: 'Color batería', max: 'Máx', min: 'Mín', no_entity: 'Entidad no disponible',
     entity_required: 'Debes indicar la entidad de temperatura (entity)',
   },
   en: {
@@ -69,7 +72,7 @@ const TPC_TEXTS = {
     show_humidity: 'Show humidity', show_battery: 'Show battery', show_minmax: 'Show max/min',
     show_graph: 'Show graph', show_current_dot: 'Current value dot',
     colors: 'Graph colors', temp: 'Temp (°)', color: 'Color',
-    state_unavailable: 'Unavailable', state_unknown: 'Unknown', max: 'Max', min: 'Min', no_entity: 'Entity unavailable',
+    state_unavailable: 'Unavailable', state_unknown: 'Unknown', meta_colors: 'Color humidity/battery icons', humidity_color: 'Humidity color', battery_color: 'Battery color', max: 'Max', min: 'Min', no_entity: 'Entity unavailable',
     entity_required: 'You must set the temperature entity (entity)',
   },
 };
@@ -275,7 +278,7 @@ class SparklineChart {
 
 /**
  * Estilos CSS de la tarjeta.
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 const TPC_STYLES = `
   ha-card { overflow: hidden; position: relative; }
@@ -299,7 +302,7 @@ const TPC_STYLES = `
 
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -368,12 +371,14 @@ class TemperaturePanelCard extends HTMLElement {
     const meta = [];
     const hum = c.humidity && h.states[c.humidity];
     if (c.show_humidity && hum && !isNaN(parseFloat(hum.state))) {
-      meta.push(`<span><ha-icon icon="mdi:water-percent"></ha-icon>${this._fmt(hum.state, 0)} ${hum.attributes.unit_of_measurement || '%'}</span>`);
+      const st = c.meta_colors ? ` style="color:${c.humidity_color}"` : '';
+      meta.push(`<span><ha-icon icon="mdi:water-percent"${st}></ha-icon>${this._fmt(hum.state, 0)} ${hum.attributes.unit_of_measurement || '%'}</span>`);
     }
     const bat = c.battery && h.states[c.battery];
     if (c.show_battery && bat && !isNaN(parseFloat(bat.state))) {
       const low = parseFloat(bat.state) <= c.battery_low;
-      meta.push(`<span class="${low ? 'low' : ''}"><ha-icon icon="mdi:${low ? 'battery-alert' : 'battery'}"></ha-icon>${this._fmt(bat.state, 0)}%</span>`);
+      const st = c.meta_colors && !low ? ` style="color:${c.battery_color}"` : '';
+      meta.push(`<span class="${low ? 'low' : ''}"><ha-icon icon="mdi:${low ? 'battery-alert' : 'battery'}"${st}></ha-icon>${this._fmt(bat.state, 0)}%</span>`);
     }
     return meta;
   }
@@ -429,7 +434,7 @@ class TemperaturePanelCard extends HTMLElement {
 
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }
@@ -443,6 +448,8 @@ class TemperaturePanelCardEditor extends HTMLElement {
       colorFields.push({ name: `temp_${i}`, selector: { number: { mode: 'box', step: 0.5 } } });
       colorFields.push({ name: `color_${i}`, selector: { color_rgb: {} } });
     });
+    colorFields.push({ name: 'humidity_color', selector: { color_rgb: {} } });
+    colorFields.push({ name: 'battery_color', selector: { color_rgb: {} } });
     return [
       { name: 'entity', required: true, selector: { entity: { domain: 'sensor', device_class: 'temperature' } } },
       { name: 'name', selector: { text: {} } },
@@ -463,6 +470,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
           { name: 'show_humidity', selector: { boolean: {} } },
           { name: 'show_battery', selector: { boolean: {} } },
           { name: 'show_current_dot', selector: { boolean: {} } },
+          { name: 'meta_colors', selector: { boolean: {} } },
         ],
       },
       { type: 'expandable', name: '', title: tpcT(this._hass, 'colors'), schema: [{ type: 'grid', name: '', schema: colorFields }] },
@@ -479,6 +487,8 @@ class TemperaturePanelCardEditor extends HTMLElement {
       const hex = ColorScale.toHex(s.color);
       data[`color_${i}`] = ColorScale._rgb(hex);
     });
+    data.humidity_color = ColorScale._rgb(ColorScale.toHex(data.humidity_color));
+    data.battery_color = ColorScale._rgb(ColorScale.toHex(data.battery_color));
     delete data.color_stops;
     return data;
   }
@@ -495,6 +505,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
       delete out[`color_${i}`];
     });
     out.color_stops = stops;
+    ['humidity_color', 'battery_color'].forEach((k) => { if (out[k]) out[k] = ColorScale.toHex(out[k]); });
     return out;
   }
 
@@ -521,7 +532,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
 
 /**
  * Registro de los elementos personalizados y de la tarjeta en el selector de HA.
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 customElements.define(TPC_CONFIG.cardTag, TemperaturePanelCard);
 customElements.define(TPC_CONFIG.editorTag, TemperaturePanelCardEditor);

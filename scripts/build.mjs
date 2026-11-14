@@ -1,5 +1,5 @@
 // Script de build: concatena los ficheros de src/ en un único JS para HACS.
-// Versión: 2026.11.4
+// Versión: 2026.11.5
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 // Orden de concatenación (dependencias primero)

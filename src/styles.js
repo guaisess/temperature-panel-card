@@ -1,6 +1,6 @@
 /**
  * Estilos CSS de la tarjeta.
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 const TPC_STYLES = `
   ha-card { overflow: hidden; position: relative; }

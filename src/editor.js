@@ -1,6 +1,6 @@
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }
@@ -14,6 +14,8 @@ class TemperaturePanelCardEditor extends HTMLElement {
       colorFields.push({ name: `temp_${i}`, selector: { number: { mode: 'box', step: 0.5 } } });
       colorFields.push({ name: `color_${i}`, selector: { color_rgb: {} } });
     });
+    colorFields.push({ name: 'humidity_color', selector: { color_rgb: {} } });
+    colorFields.push({ name: 'battery_color', selector: { color_rgb: {} } });
     return [
       { name: 'entity', required: true, selector: { entity: { domain: 'sensor', device_class: 'temperature' } } },
       { name: 'name', selector: { text: {} } },
@@ -34,6 +36,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
           { name: 'show_humidity', selector: { boolean: {} } },
           { name: 'show_battery', selector: { boolean: {} } },
           { name: 'show_current_dot', selector: { boolean: {} } },
+          { name: 'meta_colors', selector: { boolean: {} } },
         ],
       },
       { type: 'expandable', name: '', title: tpcT(this._hass, 'colors'), schema: [{ type: 'grid', name: '', schema: colorFields }] },
@@ -50,6 +53,8 @@ class TemperaturePanelCardEditor extends HTMLElement {
       const hex = ColorScale.toHex(s.color);
       data[`color_${i}`] = ColorScale._rgb(hex);
     });
+    data.humidity_color = ColorScale._rgb(ColorScale.toHex(data.humidity_color));
+    data.battery_color = ColorScale._rgb(ColorScale.toHex(data.battery_color));
     delete data.color_stops;
     return data;
   }
@@ -66,6 +71,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
       delete out[`color_${i}`];
     });
     out.color_stops = stops;
+    ['humidity_color', 'battery_color'].forEach((k) => { if (out[k]) out[k] = ColorScale.toHex(out[k]); });
     return out;
   }
 

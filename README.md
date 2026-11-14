@@ -60,6 +60,8 @@ cards:
 | `info_width` | `110` | Ancho de la columna temperatura/datos (px); fija el inicio de la gráfica |
 | `refresh_minutes` | `10` | Cada cuántos minutos se recarga el histórico |
 | `show_graph` / `show_minmax` / `show_humidity` / `show_battery` / `show_current_dot` | `true` | Mostrar/ocultar elementos |
+| `meta_colors` | `true` | Colorea los iconos de humedad y batería |
+| `humidity_color` / `battery_color` | `#38bdf8` / `#22c55e` | Colores de esos iconos (hex o RGB); la batería baja siempre va en rojo |
 | `battery_low` | `20` | % bajo el cual la batería se marca en rojo |
 | `line_width` | `2` | Grosor de la línea |
 | `area_opacity` | `0.18` | Opacidad del relleno bajo la línea |

@@ -1,6 +1,6 @@
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
@@ -27,6 +27,9 @@ const TPC_CONFIG = {
     line_width: 2,
     area_opacity: 0.18,
     battery_low: 20,
+    meta_colors: true,           // colorear los iconos de humedad y batería
+    humidity_color: '#38bdf8',   // color del icono de humedad
+    battery_color: '#22c55e',    // color del icono de batería (en rojo si está baja)
   },
 
   // Umbrales de color por defecto (°C): la gráfica se colorea con degradado según el valor

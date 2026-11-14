@@ -2,6 +2,9 @@
 
 Formato de versión: `AAAA.MM.V`.
 
+## 2026.11.5 — 2026-11-14
+- Iconos de humedad y batería coloreados (`meta_colors`, `humidity_color`, `battery_color`), configurables en YAML y en el editor visual. La batería baja sigue en rojo.
+
 ## 2026.11.4 — 2026-11-14
 - Estados `unknown`/`unavailable`: texto traducido ("No disponible"/"Desconocido") pequeño y atenuado, sin unidad ni solapes; gráfica atenuada y sin punto actual.
 

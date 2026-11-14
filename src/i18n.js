@@ -1,6 +1,6 @@
 /**
  * Textos traducibles (es / en).
- * Versión: 2026.11.4
+ * Versión: 2026.11.5
  */
 const TPC_TEXTS = {
   es: {
@@ -9,7 +9,7 @@ const TPC_TEXTS = {
     show_humidity: 'Mostrar humedad', show_battery: 'Mostrar batería', show_minmax: 'Mostrar máx/mín',
     show_graph: 'Mostrar gráfica', show_current_dot: 'Punto del valor actual',
     colors: 'Colores de la gráfica', temp: 'Temp. (°)', color: 'Color',
-    state_unavailable: 'No disponible', state_unknown: 'Desconocido', max: 'Máx', min: 'Mín', no_entity: 'Entidad no disponible',
+    state_unavailable: 'No disponible', state_unknown: 'Desconocido', meta_colors: 'Colorear iconos de humedad/batería', humidity_color: 'Color humedad', battery_color: 'Color batería', max: 'Máx', min: 'Mín', no_entity: 'Entidad no disponible',
     entity_required: 'Debes indicar la entidad de temperatura (entity)',
   },
   en: {
@@ -18,7 +18,7 @@ const TPC_TEXTS = {
     show_humidity: 'Show humidity', show_battery: 'Show battery', show_minmax: 'Show max/min',
     show_graph: 'Show graph', show_current_dot: 'Current value dot',
     colors: 'Graph colors', temp: 'Temp (°)', color: 'Color',
-    state_unavailable: 'Unavailable', state_unknown: 'Unknown', max: 'Max', min: 'Min', no_entity: 'Entity unavailable',
+    state_unavailable: 'Unavailable', state_unknown: 'Unknown', meta_colors: 'Color humidity/battery icons', humidity_color: 'Humidity color', battery_color: 'Battery color', max: 'Max', min: 'Min', no_entity: 'Entity unavailable',
     entity_required: 'You must set the temperature entity (entity)',
   },
 };
