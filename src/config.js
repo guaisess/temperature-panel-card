@@ -1,10 +1,10 @@
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
-  version: '2026.11.2',
+  version: '2026.11.3',
   // Nombre de los elementos personalizados
   cardTag: 'temperature-panel-card',
   editorTag: 'temperature-panel-card-editor',
@@ -16,7 +16,8 @@ const TPC_CONFIG = {
     name: '',
     hours: 24,
     decimals: 1,
-    graph_height: 70,
+    graph_height: 70,   // alto mínimo de la zona de gráfica (px)
+    info_width: 110,    // ancho fijo de la columna de temperatura/datos (px): alinea todas las gráficas
     refresh_minutes: 10,
     show_humidity: true,
     show_battery: true,

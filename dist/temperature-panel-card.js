@@ -1,11 +1,11 @@
 (() => {
 /**
  * Configuración central de la tarjeta (sin valores hardcodeados en el resto del código).
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 const TPC_CONFIG = {
   // Versión de la tarjeta (formato AAAA.MM.V)
-  version: '2026.11.2',
+  version: '2026.11.3',
   // Nombre de los elementos personalizados
   cardTag: 'temperature-panel-card',
   editorTag: 'temperature-panel-card-editor',
@@ -17,7 +17,8 @@ const TPC_CONFIG = {
     name: '',
     hours: 24,
     decimals: 1,
-    graph_height: 70,
+    graph_height: 70,   // alto mínimo de la zona de gráfica (px)
+    info_width: 110,    // ancho fijo de la columna de temperatura/datos (px): alinea todas las gráficas
     refresh_minutes: 10,
     show_humidity: true,
     show_battery: true,
@@ -50,12 +51,12 @@ const TPC_CONFIG = {
 
 /**
  * Textos traducibles (es / en).
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 const TPC_TEXTS = {
   es: {
     entity: 'Entidad de temperatura', humidity: 'Entidad de humedad', battery: 'Entidad de batería',
-    name: 'Nombre', hours: 'Horas de gráfica', decimals: 'Decimales', graph_height: 'Alto de la gráfica (px)',
+    name: 'Nombre', hours: 'Horas de gráfica', decimals: 'Decimales', graph_height: 'Alto de la gráfica (px)', info_width: 'Ancho columna datos (px)',
     show_humidity: 'Mostrar humedad', show_battery: 'Mostrar batería', show_minmax: 'Mostrar máx/mín',
     show_graph: 'Mostrar gráfica', show_current_dot: 'Punto del valor actual',
     colors: 'Colores de la gráfica', temp: 'Temp. (°)', color: 'Color',
@@ -64,7 +65,7 @@ const TPC_TEXTS = {
   },
   en: {
     entity: 'Temperature entity', humidity: 'Humidity entity', battery: 'Battery entity',
-    name: 'Name', hours: 'Graph hours', decimals: 'Decimals', graph_height: 'Graph height (px)',
+    name: 'Name', hours: 'Graph hours', decimals: 'Decimals', graph_height: 'Graph height (px)', info_width: 'Data column width (px)',
     show_humidity: 'Show humidity', show_battery: 'Show battery', show_minmax: 'Show max/min',
     show_graph: 'Show graph', show_current_dot: 'Current value dot',
     colors: 'Graph colors', temp: 'Temp (°)', color: 'Color',
@@ -274,28 +275,29 @@ class SparklineChart {
 
 /**
  * Estilos CSS de la tarjeta.
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 const TPC_STYLES = `
   ha-card { overflow: hidden; position: relative; }
-  .row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
-  .info { display: flex; flex-direction: column; min-width: 0; flex: 0 0 auto; max-width: 55%; }
-  .name { font-size: 0.95rem; font-weight: 500; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row { display: grid; grid-template-columns: var(--tpc-info-w, 110px) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 12px; row-gap: 2px; padding: 12px 14px; }
+  .row.nograph { grid-template-columns: minmax(0, 1fr); }
+  .info { display: flex; flex-direction: column; min-width: 0; grid-column: 1; grid-row: 2; }
+  .name { grid-column: 1 / -1; grid-row: 1; font-size: 0.95rem; font-weight: 500; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .temp { font-size: 2.1rem; font-weight: 700; line-height: 1.1; }
   .temp small { font-size: 0.9rem; opacity: .7; margin-left: 2px; }
   .meta { display: flex; flex-wrap: nowrap; gap: 10px; font-size: 0.8rem; color: var(--secondary-text-color); align-items: center; min-height: 1.2em; margin-top: 2px; }
   .meta span { display: inline-flex; align-items: center; gap: 2px; }
   .meta ha-icon { --mdc-icon-size: 15px; }
   .low { color: var(--error-color, #ef4444); }
-  .chart { position: relative; flex: 1 1 auto; min-width: 0; }
-  .chart svg { width: 100%; height: 100%; display: block; }
+  .chart { position: relative; grid-column: 2; grid-row: 2; min-width: 0; align-self: stretch; }
+  .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .dot { position: absolute; right: -2px; width: 8px; height: 8px; border-radius: 50%; transform: translateY(-50%); box-shadow: 0 0 0 2px var(--card-background-color, #1c1c1c); }
   .msg { padding: 16px; color: var(--secondary-text-color); }
 `;
 
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -393,7 +395,7 @@ class TemperaturePanelCard extends HTMLElement {
     let chart = '';
     const pts = this._points;
     if (c.show_graph) {
-      chart = `<div class="chart" style="height:${c.graph_height}px"></div>`;
+      chart = `<div class="chart" style="min-height:${c.graph_height}px"></div>`;
       if (pts && pts.length > 1) {
         const all = isNaN(cur) ? pts : [...pts, { t: Date.now(), v: cur }];
         const mm = Stats.minMax(all);
@@ -403,14 +405,14 @@ class TemperaturePanelCard extends HTMLElement {
         }
         const r = new SparklineChart(this._scale, c).render(all, this._uid);
         const dot = c.show_current_dot ? `<div class="dot" style="top:${r.lastY}%;background:${color}"></div>` : '';
-        chart = `<div class="chart" style="height:${c.graph_height}px">${r.svg}${dot}</div>`;
+        chart = `<div class="chart" style="min-height:${c.graph_height}px">${r.svg}${dot}</div>`;
       }
     }
 
     this.shadowRoot.innerHTML = `<style>${TPC_STYLES}</style>
-      <ha-card><div class="row">
+      <ha-card><div class="row${c.show_graph ? '' : ' nograph'}" style="--tpc-info-w:${c.info_width}px">
+        <div class="name">${name}</div>
         <div class="info">
-          <div class="name">${name}</div>
           <div class="temp" style="color:${color}">${isNaN(cur) ? st.state : this._fmt(cur, c.decimals)}<small>${unit}</small></div>
           ${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}
           ${range.length ? `<div class="meta">${range.join('')}</div>` : ''}
@@ -421,7 +423,7 @@ class TemperaturePanelCard extends HTMLElement {
 
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }
@@ -444,6 +446,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
         type: 'grid', name: '', schema: [
           { name: 'hours', selector: { number: { min: 1, max: 720, mode: 'box' } } },
           { name: 'decimals', selector: { number: { min: 0, max: 3, mode: 'box' } } },
+          { name: 'info_width', selector: { number: { min: 60, max: 300, mode: 'box' } } },
           { name: 'graph_height', selector: { number: { min: 20, max: 300, mode: 'box' } } },
         ],
       },
@@ -512,7 +515,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
 
 /**
  * Registro de los elementos personalizados y de la tarjeta en el selector de HA.
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 customElements.define(TPC_CONFIG.cardTag, TemperaturePanelCard);
 customElements.define(TPC_CONFIG.editorTag, TemperaturePanelCardEditor);

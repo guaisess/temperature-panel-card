@@ -1,6 +1,6 @@
 /**
  * Tarjeta principal: lee configuración y estados, pide histórico y pinta el resultado.
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 class TemperaturePanelCard extends HTMLElement {
   static getConfigElement() { return document.createElement(TPC_CONFIG.editorTag); }
@@ -98,7 +98,7 @@ class TemperaturePanelCard extends HTMLElement {
     let chart = '';
     const pts = this._points;
     if (c.show_graph) {
-      chart = `<div class="chart" style="height:${c.graph_height}px"></div>`;
+      chart = `<div class="chart" style="min-height:${c.graph_height}px"></div>`;
       if (pts && pts.length > 1) {
         const all = isNaN(cur) ? pts : [...pts, { t: Date.now(), v: cur }];
         const mm = Stats.minMax(all);
@@ -108,14 +108,14 @@ class TemperaturePanelCard extends HTMLElement {
         }
         const r = new SparklineChart(this._scale, c).render(all, this._uid);
         const dot = c.show_current_dot ? `<div class="dot" style="top:${r.lastY}%;background:${color}"></div>` : '';
-        chart = `<div class="chart" style="height:${c.graph_height}px">${r.svg}${dot}</div>`;
+        chart = `<div class="chart" style="min-height:${c.graph_height}px">${r.svg}${dot}</div>`;
       }
     }
 
     this.shadowRoot.innerHTML = `<style>${TPC_STYLES}</style>
-      <ha-card><div class="row">
+      <ha-card><div class="row${c.show_graph ? '' : ' nograph'}" style="--tpc-info-w:${c.info_width}px">
+        <div class="name">${name}</div>
         <div class="info">
-          <div class="name">${name}</div>
           <div class="temp" style="color:${color}">${isNaN(cur) ? st.state : this._fmt(cur, c.decimals)}<small>${unit}</small></div>
           ${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}
           ${range.length ? `<div class="meta">${range.join('')}</div>` : ''}

@@ -56,7 +56,8 @@ cards:
 | `battery` | — | Sensor de batería |
 | `hours` | `24` | Horas de histórico de la gráfica |
 | `decimals` | `1` | Decimales de la temperatura |
-| `graph_height` | `70` | Alto de la gráfica (px) |
+| `graph_height` | `70` | Alto mínimo de la gráfica (px); se estira hasta el borde inferior |
+| `info_width` | `110` | Ancho de la columna temperatura/datos (px); fija el inicio de la gráfica |
 | `refresh_minutes` | `10` | Cada cuántos minutos se recarga el histórico |
 | `show_graph` / `show_minmax` / `show_humidity` / `show_battery` / `show_current_dot` | `true` | Mostrar/ocultar elementos |
 | `battery_low` | `20` | % bajo el cual la batería se marca en rojo |

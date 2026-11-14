@@ -1,6 +1,6 @@
 /**
  * Editor visual de la tarjeta (basado en ha-form).
- * Versión: 2026.11.2
+ * Versión: 2026.11.3
  */
 class TemperaturePanelCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; this._draw(); }
@@ -23,6 +23,7 @@ class TemperaturePanelCardEditor extends HTMLElement {
         type: 'grid', name: '', schema: [
           { name: 'hours', selector: { number: { min: 1, max: 720, mode: 'box' } } },
           { name: 'decimals', selector: { number: { min: 0, max: 3, mode: 'box' } } },
+          { name: 'info_width', selector: { number: { min: 60, max: 300, mode: 'box' } } },
           { name: 'graph_height', selector: { number: { min: 20, max: 300, mode: 'box' } } },
         ],
       },
